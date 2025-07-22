@@ -19,49 +19,26 @@
         <link rel="stylesheet" href="{{ url_for('static', filename='css/warning_popup.css') }}">
     </head>
 <body>
-    <nav class="navbar">
-        <div class="navbar-container">
-            <div class="navbar-brand">
-                <i class="fas fa-shield-alt brand-icon"></i>
-                <span class="brand-text">HELI<span class="highlight">XR</span></span>
-                <span class="classification">CLASSIFIED</span>
-            </div>
-            
-            <button class="mobile-menu-toggle" onclick="toggleMenu()">
-                <i class="fas fa-bars menu-icon"></i>
-            </button>
-
-            <div class="navbar-links" id="navbarLinks">
-                <a href="dashboard_analytics" class="nav-link {% if active_page == 'analytics' %}active{% endif %}">
-                    <i class="fas fa-chart-line nav-icon"></i>
-                    ANALYTICS
-                </a>
-                <a href="dashboard_visual" class="nav-link {% if active_page == 'visual_oversight' %}active{% endif %}">
-                    <i class="fas fa-eye nav-icon"></i>
-                    VISUAL OVERSIGHT
-                </a>
-                <a href="dashboard_ai_agent" class="nav-link {% if active_page == 'ai_agent' %}active{% endif %}">
-                    <i class="fas fa-robot nav-icon"></i>
-                    AI AGENT
-                </a>
-                <a href="dashboard_command" class="nav-link {% if active_page == 'command_view' %}active{% endif %}">
-                    <i class="fas fa-sliders-h nav-icon"></i>
-                    COMMAND VIEW
-                </a>
-            </div>
-
-            <div class="navbar-status">
-                <div class="status-indicator online"></div>
-                <span class="status-text">SYSTEM ONLINE</span>
-                <a href="logout" class="logout-link">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>LOGOUT</span>
-                </a>
-            </div>
-        </div>
-    </nav>
-    
     <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                Heli<span class="highlight">XR</span>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li {% if active_page == 'analytics' %}class="active-item"{% endif %}><a href="dashboard_analytics"><i class="fas fa-chart-line"></i><span>Analytics</span></a></li>
+                    <li {% if active_page == 'visual_oversight' %}class="active-item"{% endif %}><a href="dashboard_visual"><i class="fas fa-eye"></i><span>Visual oversight</span></a></li>
+                    <li {% if active_page == 'ai_agent' %}class="active-item"{% endif %}><a href="dashboard_ai_agent"><i class="fas fa-robot"></i><span>AI agent</span></a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-actions">
+                <a href="dashboard_command" class="command-view-button {% if active_page == 'command_view' %}active-command{% endif %}"><i class="fas fa-sliders-h"></i><span>Command view</span></a>
+                <div class="sidebar-footer">
+                    Efficiency Visualized
+                </div>
+                <a href="logout" class="logout-button"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a>
+            </div>
+        </aside>
         <main class="main-content">
             {% block main_dashboard_content %}
             <div class="video-placeholder">
@@ -72,29 +49,5 @@
     </div>
     {% include '/warning_popup.html' %}
     <script src="{{ url_for('static', filename='js/warning_popup.js') }}"></script>
-    <script>
-        function toggleMenu() {
-            const navbarLinks = document.getElementById('navbarLinks');
-            const menuIcon = document.querySelector('.menu-icon');
-            
-            navbarLinks.classList.toggle('mobile-open');
-            
-            if (navbarLinks.classList.contains('mobile-open')) {
-                menuIcon.className = 'fas fa-times menu-icon';
-            } else {
-                menuIcon.className = 'fas fa-bars menu-icon';
-            }
-        }
-        
-        // Close mobile menu when clicking on a nav link
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.addEventListener('click', () => {
-                const navbarLinks = document.getElementById('navbarLinks');
-                const menuIcon = document.querySelector('.menu-icon');
-                navbarLinks.classList.remove('mobile-open');
-                menuIcon.className = 'fas fa-bars menu-icon';
-            });
-        });
-    </script>
 </body>
 </html>

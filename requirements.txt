@@ -16,8 +16,3 @@ numpy
 scikit-learn
 chatterbox-tts
 pymongo
-<<<<<<< HEAD
-flask_socketio
-=======
-genai
->>>>>>> 4df695a46d613bcea873dd91944f0776910f785e
