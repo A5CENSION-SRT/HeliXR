@@ -1,9 +1,13 @@
 {% extends "dashboard_template.html" %}
 
-{% set active_page = 'ai_agent' %}
+{% block title %}AI Agent Interface{% endblock %}
 
 {% block main_dashboard_content %}
-<div class="ai-agent-container" id="ai-agent-container"> <!-- Added ID -->
+
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard_ai_agent.css') }}">
+
+<div class="ai-agent-container" id="ai-agent-container">
     <div class="header">
         <h1>AI Agent Interface</h1>
         <!-- Voice/Text mode toggle -->
@@ -20,7 +24,7 @@
     <div class="chat-display" id="chat-display">
         <!-- Conversation will be appended here -->
         <div class="message system">
-            <p>Welcome to the HeliXR AI Agent. How may I assist you today? <br>You can ask me to monitor data, operate equipment, or help troubleshoot any issues. <br>Toggle to voice mode to record your commands.</p>
+            <p>Welcome to the Sudarshan Chakra. How may I assist you today? <br>You can ask me to monitor data, operate equipment, or help troubleshoot any issues. <br>Toggle to voice mode to record your commands.</p>
         </div>
     </div>
 
@@ -39,6 +43,6 @@
     </div>
 </div>
 
+<!-- This script link remains at the end of the block to ensure it loads after the HTML elements -->
 <script src="{{ url_for('static', filename='js/dashboard_ai_agent.js') }}"></script>
-
-{% endblock main_dashboard_content %}
+{% endblock main_dashboard_content%}
