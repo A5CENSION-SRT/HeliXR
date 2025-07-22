@@ -16,3 +16,4 @@ numpy
 scikit-learn
 chatterbox-tts
 pymongo
+flask_socketio
