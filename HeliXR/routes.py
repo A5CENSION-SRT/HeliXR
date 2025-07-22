@@ -34,14 +34,14 @@ load_dotenv()
 def init_mongo():
     try:
         # Get connection string from environment or config
-        mongo_uri = app.config.get('MONGO_URI', 'mongodb://localhost:27017/')
+        mongo_uri = 'mongodb+srv://snehalreddy:S0OcbrCRXJmAZrAd@sudarshan-chakra-cluste.0hokvj0.mongodb.net/sudarshan-chakra'
         
         # Connect to MongoDB
         client = MongoClient(mongo_uri)
         
         # Get database and collection
-        app.mongo_db = client[app.config['MONGO_DB_NAME']]
-        app.mongo_collection = app.mongo_db[app.config['MONGO_COLLECTION_NAME']]
+        app.mongo_db = "radarDB"
+        app.mongo_collection = "scans"
 
         
     except Exception as e:
@@ -337,7 +337,7 @@ def login():
             if user and bcrypt.check_password_hash(user.password, form.password.data):
                 login_user(user, remember=form.remember.data)
                 session['chat_history'] = []
-                return redirect(url_for('dashboard_analytics'))
+                return redirect(url_for('dashboard_ai_agent'))
             else:
                 flash('Login Unsuccessful. Please check email and password', 'danger')
     return render_template('login.html', title="HELIXR-Login", css_path="login", form=form)

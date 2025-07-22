@@ -12,9 +12,9 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
 app.mongo_db = None
 app.mongo_collection = None
 
-app.config['MONGO_URI'] = "mongodb+srv://UnityUser:saucetoss@saucecluster.qcpwyah.mongodb.net/TomatoSauce?retryWrites=true&w=majority"
-app.config['MONGO_DB_NAME'] = "TomatoSauce"
-app.config['MONGO_COLLECTION_NAME'] = "SauceData"
+app.config['MONGO_URI'] = "mongodb+srv://snehalreddy:S0OcbrCRXJmAZrAd@sudarshan-chakra-cluste.0hokvj0.mongodb.net/sudarshan-chakra"
+app.config['MONGO_DB_NAME'] = "radarDB"
+app.config['MONGO_COLLECTION_NAME'] = "scans"
 
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
