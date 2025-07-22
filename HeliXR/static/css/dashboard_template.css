@@ -1,191 +1,140 @@
-body, html {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    font-family: "Roboto", sans-serif;
-    background-color: #151019;
-    color: #FFFFFF;
-    overflow: hidden;
+/* Import Google Font */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+
+/* Style for page content to avoid being hidden by the fixed navbar */
+body {
+    padding-top: 70px; /* Provides space for the fixed navbar */
+    background-color: #0d1a0f;
+    font-family: 'Orbitron', sans-serif;
 }
 
-.dashboard-container {
+/* Main Navbar Styling */
+.navbar {
+    background-color: #090e09; 
     display: flex;
-    height: 100vh;
-}
-
-.sidebar {
-    width: 280px;
-    background-color: #1d1a24;
-    padding: 25px 0;
+    align-items: center;
+    justify-content: space-between; 
+    padding: 8px 25px;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
     box-sizing: border-box;
+    border-bottom: 1px solid rgba(0, 255, 65, 0.15);
+}
+
+/* Left side: Brand Icon and Text */
+.navbar-brand {
     display: flex;
-    flex-direction: column;
-    border-right: 1px solid #333;
+    align-items: center;
+    gap: 12px;
 }
 
-.sidebar-logo {
-    font-family: "Orbitron", sans-serif;
-    font-size: 30px;
-    font-weight: 500;
-    color: #FFFFFF;
-    text-align: center;
-    padding: 10px 20px;
-    margin-bottom: 30px;
-    background-color: transparent;
+.brand-icon {
+    color: #00ff41;
+    font-size: 24px;
+    filter: drop-shadow(0 0 8px rgba(0, 255, 65, 0.7));
 }
 
-.sidebar-logo .highlight {
+.brand-text {
+    font-weight: 700;
+    font-size: 16px;
+    color: #00ff41;
+    text-shadow: 0 0 8px rgba(0, 255, 65, 0.7);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.brand-classification {
+    background-color: #c00;
+    color: #fff;
+    padding: 5px 10px;
+    font-size: 11px;
     font-weight: 900;
-    color: #EC4E20;
-    background-color: transparent;
+    border-radius: 3px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
 }
 
-.sidebar-nav {
-    flex-grow: 1;
-}
-
-.sidebar-nav ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.sidebar-nav li {
-    margin: 5px 15px;
-    border-radius: 7px;
-}
-
-.sidebar-nav li.active-item {
-    border: 2px solid #EC4E20;
-}
-
-.sidebar-nav a {
-    font-family: "Space Grotesk", sans-serif;
-    font-size: 16px;
-    font-weight: 500;
-    color: #a9a9b3;
-    text-decoration: none;
+/* Center group for navigation links and status */
+.navbar-center-group {
     display: flex;
     align-items: center;
-    padding: 12px 20px;
-    border-radius: 5px;
-    transition: background-color 0.2s ease, color 0.2s ease;
+    gap: 24px;
 }
 
-.sidebar-nav a i {
-    margin-right: 15px;
-    font-size: 18px;
-    width: 20px;
-    text-align: center;
-    color: #7A7A7A;
-}
-
-.sidebar-nav a:hover i,
-.sidebar-nav li.active-item a i {
-    color: #EC4E20;
-}
-
-
-.sidebar-nav a:hover,
-.sidebar-nav li.active-item a {
-    background-color: rgba(219, 138, 116, 0.1);
-    color: #FFFFFF;
-}
-.sidebar-nav li.active-item a {
-    color: #FFFFFF;
-}
-
-
-.sidebar-actions {
-    padding: 0 25px;
-    margin-top: 20px;
-}
-
-.command-view-button,
-.logout-button {
+/* General styles for nav links */
+.nav-link {
     display: flex;
     align-items: center;
-    justify-content: center;
-    width: 100%;
-    box-sizing: border-box;
-    font-size: 16px;
-    text-align: center;
-    padding: 12px 10px;
+    gap: 8px;
     text-decoration: none;
-    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
-}
-
-.command-view-button i,
-.logout-button i {
-    margin-right: 10px;
-    font-size: 16px;
-}
-
-.command-view-button {
-    background-color: #DB8A74;
-    color: #151019;
-    font-family: "Russo One", sans-serif;
-    border-radius: 25px;
-    margin-bottom: 20px;
-    border: 3px solid transparent;
-}
-.command-view-button.active-command {
-    border: 3px solid #EC4E20;
-    background-color: #D47B61;
-}
-
-.command-view-button:hover {
-    background-color: #E6AD9E;
-}
-
-.sidebar-footer {
-    font-family: "Space Grotesk", sans-serif;
-    font-size: 13px;
-    font-weight: 400;
-    color: #7A7A7A;
-    text-align: center;
-    padding: 15px 0;
-    background-color: transparent;
-    margin-bottom: 15px;
-}
-
-.logout-button {
-    background-color: #2a2633;
-    color: #a9a9b3;
-    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
     font-size: 14px;
-    font-weight: 500;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+}
+
+.nav-icon {
+    font-size: 18px;
+    width: 18px; 
+    text-align: center;
+}
+
+/* 'DASHBOARD' link styling */
+.dashboard-link {
+    color: #00ff41;
+    padding: 8px 14px;
+    border: 2px solid #00ff41;
     border-radius: 5px;
-    border: 1px solid #383441;
+    background-color: rgba(0, 255, 65, 0.1);
+    box-shadow: 0 0 12px rgba(0, 255, 65, 0.6), inset 0 0 8px rgba(0, 255, 65, 0.3);
 }
 
-.logout-button:hover {
-    background-color: #383441;
-    color: #FFFFFF;
-    border-color: #504c5a;
+.dashboard-link:hover {
+    box-shadow: 0 0 18px rgba(0, 255, 65, 0.8), inset 0 0 12px rgba(0, 255, 0.5);
+    background-color: rgba(0, 255, 65, 0.2);
 }
 
-.main-content {
-    flex-grow: 1;
-    background-color: #151019;
+.dashboard-icon {
+    color: #00ff41; 
+}
+
+/* 'CLASSIFIED' link styling */
+.classified-link {
+    color: rgba(200, 225, 200, 0.7);
+}
+
+.classified-link:hover, .classified-link.active {
+    color: #00ff41;
+}
+
+/* System Status Indicator */
+.navbar-status {
     display: flex;
-    justify-content: center;
     align-items: center;
-    padding: 20px;
-    box-sizing: border-box;
+    gap: 10px;
 }
 
-.video-placeholder {
-    width: 100%;
-    height: 100%;
-    background-color: #000000;
-    border: 1px solid #333;
-    border-radius: 8px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #444444;
-    font-family: "Space Grotesk", sans-serif;
-    font-size: 22px;
-    font-weight: 400;
+.status-indicator {
+    width: 10px;
+    height: 10px;
+    background-color: #00ff41;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #00ff41, 0 0 12px #00ff41;
+    animation: pulse-green 2s infinite;
+}
+
+@keyframes pulse-green {
+    0% { transform: scale(0.95); box-shadow: 0 0 8px #00ff41; }
+    70% { transform: scale(1.1); box-shadow: 0 0 12px #00ff41; }
+    100% { transform: scale(0.95); box-shadow: 0 0 8px #00ff41; }
+}
+
+.status-text {
+    font-weight: 700;
+    font-size: 14px;
+    color: #00ff41;
+    text-transform: uppercase;
 }

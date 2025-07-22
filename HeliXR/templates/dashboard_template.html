@@ -1,53 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        {% if title%}
-        <title>{{ title }}</title>
-        {% else %}
-        <title>HeliXR</title>
-        {% endif%}
-        {% if css_path %}
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/' + css_path + '.css') }}">
-        {% endif %}
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&family=Roboto:ital,wdth,wght@0,75..100,100..900;1,75..100,100..900&family=Russo+One&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard_template.css') }}">
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/warning_popup.css') }}">
-    </head>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Sudarshan Chakra{% endblock %}</title>
+    
+    <!-- Link to your CSS file -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard_template.css') }}">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+</head>
 <body>
-    <div class="dashboard-container">
-        <aside class="sidebar">
-            <div class="sidebar-logo">
-                Heli<span class="highlight">XR</span>
-            </div>
-            <nav class="sidebar-nav">
-                <ul>
-                    <li {% if active_page == 'analytics' %}class="active-item"{% endif %}><a href="dashboard_analytics"><i class="fas fa-chart-line"></i><span>Analytics</span></a></li>
-                    <li {% if active_page == 'visual_oversight' %}class="active-item"{% endif %}><a href="dashboard_visual"><i class="fas fa-eye"></i><span>Visual oversight</span></a></li>
-                    <li {% if active_page == 'ai_agent' %}class="active-item"{% endif %}><a href="dashboard_ai_agent"><i class="fas fa-robot"></i><span>AI agent</span></a></li>
-                </ul>
-            </nav>
-            <div class="sidebar-actions">
-                <a href="dashboard_command" class="command-view-button {% if active_page == 'command_view' %}active-command{% endif %}"><i class="fas fa-sliders-h"></i><span>Command view</span></a>
-                <div class="sidebar-footer">
-                    Efficiency Visualized
-                </div>
-                <a href="logout" class="logout-button"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a>
-            </div>
-        </aside>
-        <main class="main-content">
-            {% block main_dashboard_content %}
-            <div class="video-placeholder">
-                MAIN AREA
-            </div>
-            {% endblock main_dashboard_content %}
-        </main>
-    </div>
-    {% include '/warning_popup.html' %}
-    <script src="{{ url_for('static', filename='js/warning_popup.js') }}"></script>
+
+    <nav class="navbar">
+      <!-- Left-aligned brand section -->
+      <div class="navbar-brand">
+        <i class="fa-solid fa-shield-halved brand-icon"></i>
+        <span class="brand-text">SUDARSHAN CHAKRA</span>
+        <span class="brand-classification">CLASSIFIED</span>
+      </div>
+    
+      <!-- Center-aligned navigation and status -->
+      <div class="navbar-center-group">
+        <!-- Links use url_for to point to Flask routes -->
+        <a href="https://sudarshan-chakra.vercel.app/" class="nav-link dashboard-link">
+          <i class="fa-solid fa-crosshairs nav-icon dashboard-icon"></i>
+          DASHBOARD
+        </a>
+        <a href="{{ url_for('dashboard_ai_agent') }}" class="nav-link classified-link">
+          <i class="fa-solid fa-lock nav-icon"></i>
+          CLASSIFIED
+        </a>
+        <div class="navbar-status">
+          <div class="status-indicator"></div>
+          <span class="status-text">SYSTEM ONLINE</span>
+        </div>
+      </div>
+    </nav>
+
+    <main class="content">
+        <!-- The content of your other pages will be injected here -->
+        {% block content %}{% endblock %}
+    </main>
+    
+    <!-- Link to your JavaScript file -->
+    <script src="{{ url_for('static', filename='js/dashboard_template.js') }}"></script>
+
 </body>
 </html>
