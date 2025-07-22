@@ -318,7 +318,7 @@ try:
     # Auto-detect CUDA GPU, otherwise use CPU
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"--- Chatterbox TTS: Attempting to load model on device: '{device}' ---")
-    tts_model = ChatterboxTTS.from_pretrained(model_name="your_model_name",device=device)
+    tts_model = ChatterboxTTS.from_pretrained(device=device)
     print("--- Chatterbox TTS model loaded successfully. ---")
 except Exception as e:
     print(f"--- FATAL ERROR: Could not load Chatterbox TTS model: {e} ---")
