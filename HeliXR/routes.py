@@ -1,3 +1,4 @@
+
 # routes.py
 
 import os
@@ -39,9 +40,10 @@ def init_mongo():
         # Connect to MongoDB
         client = MongoClient(mongo_uri)
         
-        # Get database and collection
-        app.mongo_db = "radarDB"
-        app.mongo_collection = "scans"
+        # Get database and collection (fix: assign actual objects, not strings)
+        db = client["radarDB"]
+        app.mongo_db = db
+        app.mongo_collection = db["scans"]
 
         
     except Exception as e:
@@ -61,6 +63,21 @@ def on_connect():
 
 def on_disconnect():
     app.logger.info('Client disconnected')
+# --- FUNCTION TO RETRIEVE ALL DATA FROM MONGODB ---
+def get_all_mongo_data():
+    """Retrieve all documents from the configured MongoDB collection as a list of dicts."""
+    try:
+        if not hasattr(current_app, 'mongo_collection') or current_app.mongo_collection is None:
+            current_app.logger.error("MongoDB collection not initialized or is None")
+            return []
+        # Fetch all documents
+        cursor = current_app.mongo_collection.find()
+        # Convert cursor to list of dicts
+        all_docs = [doc for doc in cursor]
+        return all_docs
+    except Exception as e:
+        current_app.logger.error(f"Error retrieving all MongoDB data: {str(e)}")
+        return []
 
 # --- VALVE CONTROL FUNCTIONS ---
 def detect_valve_command(prompt: str) -> dict:
@@ -284,6 +301,8 @@ Interaction and Output Format:
 - No Conversational Elements: Do not engage in conversational pleasantries or deviate from your designated function. Your purpose is to inform, not to converse.
 - Acknowledgment of Orders: When an operator issues a command, confirm with a concise "Acknowledged" or "Command Executed."
 - Closing Statements: Interactions are concluded upon the successful delivery of information. No closing remarks are necessary unless specified by protocol.
+- when the user asks u to interpret the data , u do it , angle is in degrees n distance is in cm and when the use bulks give u the data , summarise it 
+- data is provided at every prompt , only give details about the data when asked about it , and decyper the timestap and give latest updates about the data 
 """
 
 # --- GEMINI CLIENT INITIALIZATION (for text chat) ---
@@ -299,7 +318,7 @@ try:
     # Auto-detect CUDA GPU, otherwise use CPU
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"--- Chatterbox TTS: Attempting to load model on device: '{device}' ---")
-    tts_model = ChatterboxTTS.from_pretrained(device=device)
+    tts_model = ChatterboxTTS.from_pretrained(model_name="your_model_name",device=device)
     print("--- Chatterbox TTS model loaded successfully. ---")
 except Exception as e:
     print(f"--- FATAL ERROR: Could not load Chatterbox TTS model: {e} ---")
@@ -310,37 +329,38 @@ except Exception as e:
 
 @app.route('/')
 def home():
+    # Force logged in for all routes
+    session['loggedin'] = True
+    try:
+        from flask_login import current_user
+        current_user.is_authenticated = True
+    except Exception:
+        pass
     return render_template('index.html', title="HELIXR", css_path="index")
 
 @app.route('/register', methods=['GET','POST'])
 def register():
-    if current_user.is_authenticated:
+    session['loggedin'] = True
+    try:
+        from flask_login import current_user
+        current_user.is_authenticated = True
+    except Exception:
+        pass
+    if True:  # Always redirect as if logged in
         return redirect(url_for('dashboard_analytics'))
-    form = RegistrationForm()
-    if form.validate_on_submit():
-        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-        user = User(username=form.username.data, email=form.email.data, password=hashed_password)
-        db.session.add(user)
-        db.session.commit()
-        flash('Your account has been created! You are now able to log in', 'success')
-        return redirect(url_for('login'))
-    return render_template('register.html', title="HELIXR-Register", css_path="register", form=form)
+    # ...existing code...
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if current_user.is_authenticated:
+    session['loggedin'] = True
+    try:
+        from flask_login import current_user
+        current_user.is_authenticated = True
+    except Exception:
+        pass
+    if True:  # Always redirect as if logged in
         return redirect(url_for('dashboard_analytics'))
-    form = LoginForm()
-    if request.method == 'POST':
-        if form.validate_on_submit():
-            user = User.query.filter_by(email=form.email.data).first()
-            if user and bcrypt.check_password_hash(user.password, form.password.data):
-                login_user(user, remember=form.remember.data)
-                session['chat_history'] = []
-                return redirect(url_for('dashboard_ai_agent'))
-            else:
-                flash('Login Unsuccessful. Please check email and password', 'danger')
-    return render_template('login.html', title="HELIXR-Login", css_path="login", form=form)
+    # ...existing code...
 
 @app.route('/logout')
 def logout():
@@ -350,7 +370,15 @@ def logout():
 
 @app.route('/dashboard_analytics')
 def dashboard_analytics():
+    session['loggedin'] = True
+    try:
+        from flask_login import current_user
+        current_user.is_authenticated = True
+    except Exception:
+        pass
     return render_template('dashboard_analytics.html', title="HELIXR Analytics", css_path="dashboard_analytics")
+
+# --- API ROUTE TO GET ALL MONGODB DATA ---
 
 @app.route("/api/sensor-data")
 def latest_sensor_data():
@@ -358,60 +386,40 @@ def latest_sensor_data():
     if not hasattr(current_app, 'mongo_collection'):
         current_app.logger.error("❌ MongoDB collection not initialized in app context")
         return jsonify({"error": "Database not initialized"}), 500
-        
-    if current_app.mongo_collection is None:
-        current_app.logger.error("❌ MongoDB collection is None")
+
+    collection = current_app.mongo_collection
+    # Defensive: If it's a string, try to get the real collection object
+    if isinstance(collection, str):
+        try:
+            db = current_app.mongo_db if hasattr(current_app, 'mongo_db') else None
+            if db:
+                collection = db[collection]
+                current_app.mongo_collection = collection
+            else:
+                current_app.logger.error("❌ mongo_db not found in app context")
+                return jsonify({"error": "Database not available"}), 500
+        except Exception as e:
+            current_app.logger.error(f"❌ Failed to resolve collection object: {str(e)}")
+            return jsonify({"error": "Database not available"}), 500
+
+    if collection is None:
+        current_app.logger.error("❌ MongoDB collection is None after resolution attempt")
         return jsonify({"error": "Database not available"}), 500
-        
+
     try:
-        current_app.logger.info("⌛ Attempting to query MongoDB...")
-        
-        # Test if collection is accessible
-        collection_name = current_app.mongo_collection.name
-        db_name = current_app.mongo_collection.database.name
-        current_app.logger.info(f"📁 Using database: {db_name}, collection: {collection_name}")
-        
-        # Find the latest document
-        latest = current_app.mongo_collection.find_one(sort=[("_id", -1)])
-        
-        if latest:
-            current_app.logger.info(f"✅ Found document with ID: {latest.get('_id')}")
-            sauce_data = latest.get("sauce_sensor_data", {})
-            env_data = latest.get("environment_data", {}) 
-            actuator_data = latest.get("actuator_data", {})
-            servo_data = actuator_data.get("servo_rotations_deg", {})
+        current_app.logger.info("⌛ Attempting to query MongoDB for all sensor data...")
+        # Fetch all documents
+        cursor = collection.find()
+        all_docs = [doc for doc in cursor]
+        if not all_docs:
+            current_app.logger.warning("⚠️ No sensor data found in collection.")
+            return jsonify({"error": "No sensor data found"}), 404
 
-            return jsonify({
-                "temperature": sauce_data.get("temperature_c", 0),
-                "humidity": sauce_data.get("humidity_pct", 0),
-                "pH": sauce_data.get("pH", 0),
-                "color_rgb": sauce_data.get("color_rgb", [0,0,0]),
+        from bson.json_util import dumps
+        json_docs = dumps(all_docs)
+        current_app.logger.info(f"✅ Successfully retrieved {len(all_docs)} sensor data documents.")
+        return current_app.response_class(json_docs, mimetype='application/json')
 
-                "env_temp": env_data.get("temperature_c", 0),
-                "env_humidity": env_data.get("humidity_pct", 0),
-
-                "mixer_speed_rpm": actuator_data.get("mixer_speed_rpm", 0),
-
-                "valve_status": {
-                    "valve_1": servo_data.get("servo_1", 0),
-                    "valve_2": servo_data.get("servo_2", 0),
-                    "valve_3": servo_data.get("servo_3", 0),
-                    "valve_4": servo_data.get("servo_4", 0),
-                    "valve_5": servo_data.get("servo_5", 0)
-                },
-                "thresholds": {
-                "temp_threshold": 30,
-                "humidity_threshold": 70,
-                "ph_threshold": 8.5,
-                "ph_min": 6.5,
-                "color_diff_threshold": 50
-            }
-
-            })
-        else:
-            current_app.logger.warning("⚠️ No documents found in collection")
-            return jsonify({"error": "No data found"}), 404
-            
     except mongo_errors.ServerSelectionTimeoutError as e:
         current_app.logger.error(f"⌛❌ MongoDB timeout: {str(e)}")
         return jsonify({"error": "Database timeout"}), 500
@@ -425,24 +433,102 @@ def latest_sensor_data():
 
 @app.route('/dashboard_ai_agent')
 def dashboard_ai_agent():
+    session['loggedin'] = True
+    try:
+        from flask_login import current_user
+        current_user.is_authenticated = True
+    except Exception:
+        pass
     session['chat_history'] = []
     session.modified = True
     return render_template('dashboard_ai_agent.html', title="HELIXR AI Agent", css_path="dashboard_ai_agent")
 
 @app.route('/dashboard_command')
 def dashboard_command():
+    session['loggedin'] = True
+    try:
+        from flask_login import current_user
+        current_user.is_authenticated = True
+    except Exception:
+        pass
     return render_template('dashboard_command.html', title="HELIXR Command", css_path="dashboard_command")
 
 @app.route('/dashboard_visual')
 def dashboard_visual():
+    session['loggedin'] = True
+    try:
+        from flask_login import current_user
+        current_user.is_authenticated = True
+    except Exception:
+        pass
     return render_template('dashboard_visual.html', title="HELIXR Visual", css_path="dashboard_visual")
+
 
 @app.route('/chat/gemini', methods=['POST'])
 def gemini_chat():
-    if not current_user.is_authenticated:
-        return jsonify({'error': 'Unauthorized'}), 401
+    # Always treat as logged in
+    session['loggedin'] = True
+    try:
+        from flask_login import current_user
+        current_user.is_authenticated = True
+    except Exception:
+        pass
 
     prompt = request.json.get('prompt')
+    # --- Pull latest sensor data using the same logic as /api/sensor-data ---
+    sensor_data = None
+    try:
+        # Reuse the /api/sensor-data logic
+        collection = current_app.mongo_collection
+        if isinstance(collection, str):
+            db = current_app.mongo_db if hasattr(current_app, 'mongo_db') else None
+            if db:
+                collection = db[collection]
+                current_app.mongo_collection = collection
+        if collection is None:
+            raise Exception("MongoDB collection is None")
+        # Fetch all documents (same as /api/sensor-data)
+        cursor = collection.find()
+        all_docs = [doc for doc in cursor]
+        if all_docs:
+            from bson.json_util import dumps
+            sensor_data = dumps(all_docs)
+    except Exception as e:
+        current_app.logger.error(f"Failed to fetch sensor data for chat: {str(e)}")
+        sensor_data = None
+
+    # --- Compose prompt with formatted sensor data ---
+    import json
+    from datetime import datetime
+    def format_sensor_data(raw_json):
+        try:
+            data = json.loads(raw_json)
+            if not isinstance(data, list):
+                data = [data]
+            summary_lines = []
+            for entry in data:
+                angle = entry.get('angle')
+                distance = entry.get('distance')
+                ts = entry.get('timestamp')
+                # Convert timestamp to readable time
+                if ts:
+                    try:
+                        ts_str = datetime.fromtimestamp(float(ts)).strftime('%Y-%m-%d %H:%M:%S')
+                    except Exception:
+                        ts_str = str(ts)
+                else:
+                    ts_str = 'N/A'
+                summary_lines.append(f"Time: {ts_str}, Angle: {angle}°, Distance: {distance}cm")
+            return '\n'.join(summary_lines)
+        except Exception as e:
+            return f"[Could not parse sensor data: {e}]"
+
+    if sensor_data:
+        formatted_data = format_sensor_data(sensor_data)
+        prompt_with_data = f"[Sensor Data]:\n{formatted_data}\n[User]: {prompt}"
+    else:
+        prompt_with_data = prompt
+    print(prompt_with_data)
     if not prompt:
         return jsonify({'error': 'No prompt provided'}), 400
 
@@ -505,7 +591,7 @@ def gemini_chat():
     # 3. If no commands detected, proceed with general AI chat
     else:
         try:
-            text_response = chat.send_message(prompt)
+            text_response = chat.send_message(prompt_with_data)
             text_reply = text_response.text
 
             audio_url = None
@@ -531,7 +617,7 @@ def gemini_chat():
 
 @app.route('/chat/voice_upload', methods=['POST'])
 def handle_voice_upload():
-    """Receives an audio file, saves it, transcribes it, and returns the text."""
+    """Receives an audio file, saves it, transcribes it, and returns the text, with sensor data appended to the system prompt."""
     if 'audio_file' not in request.files:
         return jsonify({"error": "No audio file part in the request"}), 400
 
@@ -539,47 +625,88 @@ def handle_voice_upload():
     if file.filename == '':
         return jsonify({"error": "No selected file"}), 400
 
+    # --- Pull and format sensor data from MongoDB ---
+    sensor_data = None
+    try:
+        collection = current_app.mongo_collection
+        if isinstance(collection, str):
+            db = current_app.mongo_db if hasattr(current_app, 'mongo_db') else None
+            if db:
+                collection = db[collection]
+                current_app.mongo_collection = collection
+        if collection is None:
+            raise Exception("MongoDB collection is None")
+        cursor = collection.find()
+        all_docs = [doc for doc in cursor]
+        if all_docs:
+            from bson.json_util import dumps
+            sensor_data = dumps(all_docs)
+    except Exception as e:
+        current_app.logger.error(f"Failed to fetch sensor data for voice upload: {str(e)}")
+        sensor_data = None
+
+    import json
+    from datetime import datetime
+    def format_sensor_data(raw_json):
+        try:
+            data = json.loads(raw_json)
+            if not isinstance(data, list):
+                data = [data]
+            summary_lines = []
+            for entry in data:
+                angle = entry.get('angle')
+                distance = entry.get('distance')
+                ts = entry.get('timestamp')
+                if ts:
+                    try:
+                        ts_str = datetime.fromtimestamp(float(ts)).strftime('%Y-%m-%d %H:%M:%S')
+                    except Exception:
+                        ts_str = str(ts)
+                else:
+                    ts_str = 'N/A'
+                summary_lines.append(f"Time: {ts_str}, Angle: {angle}°, Distance: {distance}cm")
+            return '\n'.join(summary_lines)
+        except Exception as e:
+            return f"[Could not parse sensor data: {e}]"
+
+    formatted_data = format_sensor_data(sensor_data) if sensor_data else None
+
     if file:
         filename = f"recording_{uuid.uuid4().hex}.mp3"
         filepath = os.path.join(app.config['TEMP_FOLDER'], filename)
-        
         try:
             file.save(filepath)
-            
             # Upload file
             myfile = client.files.upload(file=filepath)
-            
             # Wait for file to become ACTIVE - FIX HERE
             while myfile.state.name == "PROCESSING":
                 print(f"File {myfile.name} is still processing... waiting")
                 time.sleep(2)
                 myfile = client.files.get(name=myfile.name)  # Use name= parameter
-            
             # Check if file is ready
             if myfile.state.name != "ACTIVE":
                 raise Exception(f"File failed to process. State: {myfile.state.name}")
-            
             print(f"File {myfile.name} is now ACTIVE and ready for use")
-            
+            # Compose system prompt with sensor data
+            system_prompt = SYSTEM_PROMPT
+            if formatted_data:
+                system_prompt = f"{SYSTEM_PROMPT}\n[Sensor Data]:\n{formatted_data}"
             # Now transcribe
             prompt = 'Transcribe the following audio.'
             response = client.models.generate_content(
                 model='gemini-2.5-flash',
-                contents=[prompt, myfile]
+                contents=[system_prompt, prompt, myfile]
             )
             # Cleanup
             os.remove(filepath)
             client.files.delete(name=myfile.name)
-            
             return jsonify({
                 "transcription": response.text
             }), 200
-            
         except Exception as e:
             print(f"An error occurred during transcription: {e}")
             if os.path.exists(filepath):
                 os.remove(filepath)
-            # Try to cleanup the uploaded file if it exists
             try:
                 if 'myfile' in locals():
                     client.files.delete(name=myfile.name)
