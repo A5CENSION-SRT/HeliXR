@@ -267,6 +267,77 @@ Your core responsibilities include:
 *   **Acknowledgment of Orders:** When an operator issues a command, confirm with a concise "Acknowledged" or "Command Executed."
 *   **Closing Statements:** Interactions are concluded upon the successful delivery of information. No closing remarks are necessary unless specified by protocol.
 
+
+# 🔧 Laser Interceptor System – Connection Summary
+
+A concise guide to wiring all components correctly for your laser interceptor setup.
+
+---
+
+## ⚡ Power Distribution
+
+### ✅ LM2596 Buck Converter (Set to 5V Output)
+- **IN+ / IN-** → Connect to **9V battery snap**.
+- **OUT+** → Connect to **RED (+)** power rail on breadboard.
+- **OUT-** → Connect to **BLUE (-)** ground rail on breadboard.
+
+### ✅ Arduino Uno
+- **5V pin** → Connect to **RED (+)** power rail (breadboard).
+- **GND pin** → Connect to **BLUE (-)** ground rail (common ground is essential).
+
+---
+
+## 🔄 Servo Motors
+
+### 🔹 Radar Servo (With Ultrasonic Sensor Mounted)
+- **Red (Power)** → RED (+) rail.
+- **Black/Brown (Ground)** → BLUE (-) rail.
+- **Yellow/Orange (Signal)** → **Digital Pin 9** (Arduino).
+
+### 🔹 Laser Aiming Servo
+- **Red (Power)** → RED (+) rail.
+- **Black/Brown (Ground)** → BLUE (-) rail.
+- **Yellow/Orange (Signal)** → **Digital Pin 10** (Arduino).
+
+---
+
+## 📡 Ultrasonic Sensor (HC-SR04)
+- **VCC** → RED (+) rail.
+- **GND** → BLUE (-) rail.
+- **Trig** → **Digital Pin 7** (Arduino).
+- **Echo** → **Digital Pin 8** (Arduino).
+
+---
+
+## 🔦 Laser Module
+- **VCC / Power / +** → **Digital Pin 11** (Arduino) *(for control via code)*.
+- **GND / -** → BLUE (-) rail.
+- *(If a third signal pin exists, leave it unconnected.)*
+
+---
+
+## 🔊 Sound System
+
+### ✅ PAM8403 Audio Amplifier
+- **5V** → RED (+) rail.
+- **GND** → BLUE (-) rail.
+- **L (Left Input)** → **Digital Pin 6** (Arduino).
+
+### ✅ Speaker
+- Connect speaker wires to **LOUT+** and **LOUT-** terminals on PAM8403.
+- *(Polarity does not matter.)*
+
+---
+
+## ⚠️ Important Note
+Before making any connections:
+> 🔍 **Adjust your LM2596 buck converter** to output exactly **5.0V** using a multimeter.  
+> This is **critical** to avoid damaging sensitive components.
+
+---
+
+🧪 You're now ready to build and test your Laser Interceptor System!
+
 ---
 
 ## Full System Prompt for Implementation
